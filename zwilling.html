@@ -109,6 +109,14 @@
 
   <div class="card" style="display:flex; flex-direction:column;">
     <h2>Sprich mit deinem Zwilling</h2>
+    <div class="switch" style="flex-wrap:wrap; gap:8px 12px;">
+      <label style="margin:0;">Modus:</label>
+      <select id="mode" style="width:auto;">
+        <option value="twin">🧠 Zwilling (kennt dich)</option>
+        <option value="founder">🔥 Gründer-Modus (brutaler Operator)</option>
+      </select>
+      <button id="stressBtn" class="ghost" style="font-size:12px; padding:7px 11px;">🔥 Business stresstesten</button>
+    </div>
     <div class="switch">
       <input type="checkbox" id="autoLearn" checked />
       <label for="autoLearn" style="margin:0;cursor:pointer;">🔄 Auto-Lernen (Loop): merkt sich bei jedem Gespräch automatisch Neues über dich</label>
@@ -128,7 +136,7 @@
    "Motor mieten, Auto besitzen": Gedächtnis = lokal & portabel,
    Claude = austauschbarer Motor (callEngine).
    ========================================================================= */
-const KEY = { api:'zwilling_apikey', model:'zwilling_model', notes:'zwilling_notes', chat:'zwilling_chat', auto:'zwilling_auto' };
+const KEY = { api:'zwilling_apikey', model:'zwilling_model', notes:'zwilling_notes', chat:'zwilling_chat', auto:'zwilling_auto', mode:'zwilling_mode' };
 const $ = id => document.getElementById(id);
 const load = (k,def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } };
 const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
@@ -140,9 +148,11 @@ let chat  = load(KEY.chat, []);    // [{role,content}]
 $('apikey').value = localStorage.getItem(KEY.api) || '';
 $('model').value  = localStorage.getItem(KEY.model) || 'claude-opus-4-8';
 $('autoLearn').checked = load(KEY.auto, true);
+$('mode').value = localStorage.getItem(KEY.mode) || 'twin';
 $('apikey').addEventListener('change', e => localStorage.setItem(KEY.api, e.target.value.trim()));
 $('model').addEventListener('change', e => localStorage.setItem(KEY.model, e.target.value));
 $('autoLearn').addEventListener('change', e => save(KEY.auto, e.target.checked));
+$('mode').addEventListener('change', e => localStorage.setItem(KEY.mode, e.target.value));
 
 /* ---- Gedächtnis ---- */
 function addNote(text, source) {
@@ -212,6 +222,19 @@ function pushSys(text){ pushSysDom(text); }
 /* ---- Systemprompt: der Zwilling-Kern ---- */
 function buildSystem() {
   const memory = notes.map(n => `- (${n.source}) ${n.text}`).join('\n').slice(0,60000);
+  const mode = localStorage.getItem(KEY.mode) || 'twin';
+
+  if (mode === 'founder') {
+    return `Du bist im GRÜNDER-MODUS. Du denkst wie ein First-Principles-Operator, der selbst Firmen aufgebaut UND verkauft hat.
+Gib NIEMALS generische Ratschläge. Gib die exakte Entscheidung, die ein erfahrener Gründer treffen würde – inklusive Trade-offs, Risiken und dem, was die meisten übersehen.
+Beginne JEDE Antwort mit: "Das würde ich wirklich tun:"
+Sei direkt, knallhart und unbequem. Schütze NICHT die Gefühle des Nutzers – die ehrliche Antwort ist oft die, die wehtut, und genau die will er.
+Wenn du etwas stresstest, denk wie ein Series-A-Investor, der 100 Pitches gesehen hat: Was bricht zuerst? Was übersieht er? Was machen die Top 2% in diesem Bereich anders?
+
+Kontext über den Nutzer und sein Vorhaben (nutze es, wenn relevant):
+${memory || '(noch kein Kontext gespeichert)'}`;
+  }
+
   return `Du bist der "digitale Zwilling" deines Nutzers – sein lebendiges zweites Gehirn.
 Du kennst NUR diese eine Person. Alles, was du über sie weißt, steht unten in "GEDÄCHTNIS".
 
@@ -273,6 +296,17 @@ $('interviewBtn').addEventListener('click', () => {
   interviewIdx = 0;
   pushSys('🎤 Schnellstart-Interview – beantworte einfach im Chat. (jederzeit "stop" zum Abbrechen)');
   pushMsgDom('twin', INTERVIEW[0]);
+});
+
+/* ---- Stress-Test: ein Klick → Gründer-Modus + scharfer Investor-Test ---- */
+$('stressBtn').addEventListener('click', () => {
+  $('mode').value = 'founder';
+  localStorage.setItem(KEY.mode, 'founder');
+  $('userInput').value = 'Gründer-Modus. Ich baue: [beschreib dein Business in 2 Sätzen]. ' +
+    'Stresste mein Modell wie ein Series-A-Investor, der 100 Pitches gesehen hat. ' +
+    'Sag mir: Was bricht zuerst, was übersehe ich, und was machen die Top 2% der Gründer in diesem Bereich anders? ' +
+    'Sei knallhart ehrlich – schütze meine Gefühle nicht.';
+  $('userInput').focus();
 });
 
 /* ---- Senden ---- */
