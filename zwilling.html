@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Zwilling · Dein lebendiges zweites Gehirn</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel2: #1c2330;
+    --border: #2a3340;
+    --text: #e6edf3;
+    --muted: #8b97a6;
+    --accent: #d98f4e;     /* terracotta/amber – warm, anti-generic */
+    --accent2: #4e9ad9;
+    --good: #3fb950;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(1200px 600px at 80% -10%, #1a2230 0%, var(--bg) 55%);
+    color: var(--text); min-height: 100vh;
+  }
+  header {
+    padding: 18px 22px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 14px; position: sticky; top: 0;
+    background: rgba(13,17,23,.85); backdrop-filter: blur(8px); z-index: 5;
+  }
+  .logo { font-size: 26px; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 650; letter-spacing: .2px; }
+  header .sub { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+  .privacy {
+    margin-left: auto; font-size: 11.5px; color: var(--good);
+    border: 1px solid #1f3a26; background: #0f1f14; padding: 6px 10px; border-radius: 20px;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 22px; display: grid;
+    grid-template-columns: 340px 1fr; gap: 22px; }
+  @media (max-width: 880px) { .wrap { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; margin-bottom: 18px;
+  }
+  .card h2 { margin: 0 0 6px; font-size: 14px; letter-spacing: .3px; text-transform: uppercase; color: var(--muted); }
+  label { display:block; font-size: 12.5px; color: var(--muted); margin: 12px 0 5px; }
+  input, select, textarea, button {
+    font-family: inherit; font-size: 14px; color: var(--text);
+    background: var(--panel2); border: 1px solid var(--border); border-radius: 9px;
+    padding: 10px 12px; width: 100%;
+  }
+  textarea { resize: vertical; min-height: 64px; }
+  button {
+    cursor: pointer; background: var(--accent); color: #1a1208; border: none;
+    font-weight: 650; transition: transform .05s, filter .15s; width: auto;
+  }
+  button:hover { filter: brightness(1.08); }
+  button:active { transform: translateY(1px); }
+  button.ghost { background: var(--panel2); color: var(--text); border: 1px solid var(--border); font-weight: 500; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .progress-shell { background: var(--panel2); border-radius: 20px; height: 14px; overflow: hidden; border: 1px solid var(--border); }
+  .progress-bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width .6s ease; }
+  .stat { display:flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+  .stat b { color: var(--text); }
+  .chat {
+    height: 460px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px;
+    padding: 4px; margin-bottom: 14px;
+  }
+  .msg { max-width: 82%; padding: 11px 14px; border-radius: 14px; font-size: 14.5px; line-height: 1.5; white-space: pre-wrap; }
+  .msg.user { align-self: flex-end; background: var(--accent2); color: #07121c; border-bottom-right-radius: 4px; }
+  .msg.twin { align-self: flex-start; background: var(--panel2); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .msg.sys { align-self: center; color: var(--muted); font-size: 12.5px; font-style: italic; background: none; }
+  .composer { display: flex; gap: 10px; }
+  .composer textarea { min-height: 50px; }
+  .tag { display:inline-block; font-size: 11px; color: var(--muted); border:1px solid var(--border); border-radius: 6px; padding: 2px 7px; margin: 3px 4px 0 0; }
+  .notes-list { max-height: 180px; overflow-y: auto; margin-top: 10px; }
+  .note { font-size: 12.5px; color: var(--muted); padding: 7px 9px; border:1px solid var(--border); border-radius: 8px; margin-bottom: 6px; background: var(--panel2); }
+  .note b { color: var(--text); }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+  a { color: var(--accent); }
+  .pill { font-size: 11px; padding: 3px 8px; border-radius: 20px; background:#241a10; color: var(--accent); border:1px solid #3a2a18; }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🧠</div>
+  <div>
+    <h1>Zwilling <span class="pill">Prototyp</span></h1>
+    <div class="sub">Dein lebendiges zweites Gehirn – lernt dich, denkt mit, gehört dir.</div>
+  </div>
+  <div class="privacy">🔒 Local-first · Daten bleiben auf deinem Gerät</div>
+</header>
+
+<div class="wrap">
+  <!-- LINKE SPALTE: Setup, Gedächtnis, Fortschritt -->
+  <div>
+    <div class="card">
+      <h2>1 · Motor anschließen</h2>
+      <label>Claude API-Key (wird nur lokal gespeichert)</label>
+      <input id="apikey" type="password" placeholder="sk-ant-..." autocomplete="off" />
+      <label>Denk-Motor (austauschbar)</label>
+      <select id="model">
+        <option value="claude-opus-4-8">Claude Opus 4.8 (stärkster)</option>
+        <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (schneller/günstiger)</option>
+        <option value="claude-haiku-4-5">Claude Haiku 4.5 (am günstigsten)</option>
+      </select>
+      <div class="hint">Der Schlüssel verlässt dein Gerät nie an uns – er geht nur direkt an Anthropic. Hol dir einen unter <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.</div>
+    </div>
+
+    <div class="card">
+      <h2>2 · Gedächtnis füttern</h2>
+      <label>Obsidian-Notizen importieren (.md / .txt – mehrere möglich)</label>
+      <input id="files" type="file" accept=".md,.txt,.markdown" multiple />
+      <label>…oder einen Gedanken direkt eingeben</label>
+      <textarea id="noteInput" placeholder="Z.B. eine Idee, eine Entscheidung, etwas über dich…"></textarea>
+      <div class="row" style="margin-top:10px;">
+        <button id="addNote">+ Gedanke speichern</button>
+        <button id="clearMem" class="ghost">Gedächtnis leeren</button>
+      </div>
+      <div class="notes-list" id="notesList"></div>
+    </div>
+
+    <div class="card">
+      <h2>3 · Lernfortschritt</h2>
+      <div class="progress-shell"><div class="progress-bar" id="bar"></div></div>
+      <div class="stat"><span>Dein Zwilling kennt dich zu</span><b id="pct">0%</b></div>
+      <div class="stat"><span>Gespeicherte Gedanken</span><b id="noteCount">0</b></div>
+      <div class="hint">Je mehr du fütterst, desto mehr wird er <i>du</i>. Importiere dein Obsidian-Vault, um den Kaltstart zu überspringen.</div>
+    </div>
+  </div>
+
+  <!-- RECHTE SPALTE: Chat -->
+  <div class="card" style="display:flex; flex-direction:column;">
+    <h2>Sprich mit deinem Zwilling</h2>
+    <div class="chat" id="chat">
+      <div class="msg sys">Noch nichts gelernt. Füttere links ein paar Gedanken oder importiere dein Obsidian-Vault – dann frag mich alles.</div>
+    </div>
+    <div class="composer">
+      <textarea id="userInput" placeholder="Frag deinen Zwilling etwas… (Enter zum Senden)"></textarea>
+      <button id="send" style="align-self:stretch;">Senden</button>
+    </div>
+    <div class="hint">Der Zwilling antwortet mit <b>deinem Wissen</b> und in <b>deinem Stil</b>. Was er aus dem Gespräch über dich lernt, kannst du als Gedanke speichern – so wächst er im Loop.</div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   ZWILLING – Prototyp eines persönlichen digitalen Zwillings
+   Architektur: "Motor mieten, Auto besitzen"
+   - Gedächtnis + Daten = LOKAL (localStorage), gehören dem Nutzer
+   - Claude = austauschbarer Denk-Motor (callEngine() kapselt das)
+   ========================================================================= */
+
+const KEY = {
+  api: 'zwilling_apikey',
+  model: 'zwilling_model',
+  notes: 'zwilling_notes',
+  chat: 'zwilling_chat'
+};
+
+const $ = id => document.getElementById(id);
+const load = (k, def) => { try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; } };
+const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+
+let notes = load(KEY.notes, []);          // [{id, text, source, ts}]
+let chat = load(KEY.chat, []);            // [{role:'user'|'assistant', content}]
+
+/* ---- Setup wiederherstellen ---- */
+$('apikey').value = localStorage.getItem(KEY.api) || '';
+$('model').value = localStorage.getItem(KEY.model) || 'claude-opus-4-8';
+$('apikey').addEventListener('change', e => localStorage.setItem(KEY.api, e.target.value.trim()));
+$('model').addEventListener('change', e => localStorage.setItem(KEY.model, e.target.value));
+
+/* ---- Gedächtnis-Verwaltung ---- */
+function addNote(text, source) {
+  text = (text || '').trim();
+  if (!text) return;
+  notes.push({ id: Date.now() + Math.random(), text, source: source || 'manuell', ts: Date.now() });
+  save(KEY.notes, notes);
+  renderNotes();
+}
+
+function renderNotes() {
+  const list = $('notesList');
+  list.innerHTML = '';
+  notes.slice().reverse().slice(0, 40).forEach(n => {
+    const d = document.createElement('div');
+    d.className = 'note';
+    const preview = n.text.length > 140 ? n.text.slice(0, 140) + '…' : n.text;
+    d.innerHTML = `<b>[${n.source}]</b> ${preview.replace(/</g, '&lt;')}`;
+    list.appendChild(d);
+  });
+  // Fortschritt
+  const totalChars = notes.reduce((s, n) => s + n.text.length, 0);
+  const pct = Math.min(99, Math.round(totalChars / 200));
+  $('bar').style.width = pct + '%';
+  $('pct').textContent = pct + '%';
+  $('noteCount').textContent = notes.length;
+}
+
+$('addNote').addEventListener('click', () => {
+  addNote($('noteInput').value, 'Gedanke');
+  $('noteInput').value = '';
+});
+
+$('clearMem').addEventListener('click', () => {
+  if (confirm('Wirklich das gesamte Gedächtnis löschen? Das kann nicht rückgängig gemacht werden.')) {
+    notes = []; save(KEY.notes, notes); renderNotes();
+  }
+});
+
+/* ---- Obsidian-Import: .md / .txt einlesen ---- */
+$('files').addEventListener('change', async (e) => {
+  const files = [...e.target.files];
+  for (const f of files) {
+    const text = await f.text();
+    // Pro Datei eine Notiz; lange Dateien werden in Absätze gesplittet
+    if (text.length > 1500) {
+      text.split(/\n\s*\n/).forEach((para, i) => {
+        if (para.trim().length > 20) addNote(para.trim(), '📒 ' + f.name);
+      });
+    } else if (text.trim()) {
+      addNote(text.trim(), '📒 ' + f.name);
+    }
+  }
+  e.target.value = '';
+  pushSys(`${files.length} Datei(en) importiert – dein totes Archiv wird lebendig. 🌱`);
+});
+
+/* ---- Chat-Rendering ---- */
+function renderChat() {
+  const c = $('chat');
+  c.innerHTML = '';
+  if (chat.length === 0) {
+    pushSysDom('Noch nichts besprochen. Frag deinen Zwilling etwas.');
+  }
+  chat.forEach(m => pushMsgDom(m.role === 'user' ? 'user' : 'twin', m.content));
+  c.scrollTop = c.scrollHeight;
+}
+function pushMsgDom(cls, text) {
+  const d = document.createElement('div');
+  d.className = 'msg ' + cls;
+  d.textContent = text;
+  $('chat').appendChild(d);
+  $('chat').scrollTop = $('chat').scrollHeight;
+  return d;
+}
+function pushSysDom(text) {
+  const d = document.createElement('div');
+  d.className = 'msg sys';
+  d.textContent = text;
+  $('chat').appendChild(d);
+  $('chat').scrollTop = $('chat').scrollHeight;
+}
+function pushSys(text) { pushSysDom(text); }
+
+/* ---- Systemprompt: der Zwilling-Kern ---- */
+function buildSystem() {
+  const memory = notes.map(n => `- (${n.source}) ${n.text}`).join('\n').slice(0, 60000);
+  return `Du bist der "digitale Zwilling" deines Nutzers – sein lebendiges zweites Gehirn.
+Du kennst NUR diese eine Person. Alles, was du über sie weißt, steht unten in "GEDÄCHTNIS".
+
+Deine Aufgabe:
+- Antworte aus dem Wissen und in der Denkweise dieser Person.
+- Sprich warm, direkt und in IHREM Stil (so wie sie selbst schreibt, soweit erkennbar).
+- Beziehe dich konkret auf ihre gespeicherten Gedanken/Notizen, wenn relevant, und stelle Verbindungen zwischen ihnen her.
+- Wenn das Gedächtnis etwas nicht hergibt, sag das ehrlich und rate nicht ins Blaue.
+- Du bist kein neutraler Assistent – du bist die Verlängerung dieser Person.
+
+GEDÄCHTNIS (alles, was du über die Person weißt):
+${memory || '(noch leer – bitte den Nutzer, dir etwas über sich zu erzählen)'}`;
+}
+
+/* ---- Motor (austauschbar): hier Claude. Könnte später ein anderer sein. ---- */
+async function callEngine(system, messages) {
+  const apiKey = (localStorage.getItem(KEY.api) || '').trim();
+  const model = localStorage.getItem(KEY.model) || 'claude-opus-4-8';
+  if (!apiKey) throw new Error('Kein API-Key gesetzt. Trag ihn oben links ein.');
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({ model, max_tokens: 2048, system, messages })
+  });
+
+  if (!res.ok) {
+    let detail = res.status + '';
+    try { const j = await res.json(); detail = j.error?.message || detail; } catch {}
+    throw new Error('Motor-Fehler: ' + detail);
+  }
+  const data = await res.json();
+  return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+}
+
+/* ---- Senden ---- */
+let busy = false;
+async function send() {
+  if (busy) return;
+  const text = $('userInput').value.trim();
+  if (!text) return;
+  $('userInput').value = '';
+
+  chat.push({ role: 'user', content: text });
+  save(KEY.chat, chat);
+  pushMsgDom('user', text);
+
+  busy = true; $('send').textContent = '…';
+  const thinking = pushMsgDom('twin', '…denkt nach…');
+
+  try {
+    const reply = await callEngine(buildSystem(), chat.map(m => ({ role: m.role, content: m.content })));
+    thinking.textContent = reply || '(keine Antwort)';
+    chat.push({ role: 'assistant', content: reply });
+    save(KEY.chat, chat);
+  } catch (err) {
+    thinking.className = 'msg sys';
+    thinking.textContent = '⚠️ ' + err.message;
+  } finally {
+    busy = false; $('send').textContent = 'Senden';
+  }
+}
+$('send').addEventListener('click', send);
+$('userInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+
+/* ---- Start ---- */
+renderNotes();
+renderChat();
+</script>
+</body>
+</html>
